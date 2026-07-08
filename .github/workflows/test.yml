@@ -65,6 +65,21 @@ jobs:
           ./bin/lobster-team status --json > /tmp/status.json
           python3 -c "import json; d=json.load(open('/tmp/status.json')); assert d['team_root']; print('status OK')"
 
+      - name: Debug - direct docker run
+        run: |
+          echo "DEBUG: WORKSPACE_HOST=${WORKSPACE_HOST:-<unset>}"
+          echo "DEBUG: GITHUB_WORKSPACE=${GITHUB_WORKSPACE:-<unset>}"
+          echo "DEBUG: HOME=${HOME:-<unset>}"
+          echo "DEBUG: workspace dir contents:"
+          ls -la "${WORKSPACE_HOST:-$HOME/software-dev-Lob}" 2>&1 | head -5 || true
+          echo "DEBUG: docker version:"
+          docker version --format '{{.Server.Version}}' 2>&1 || echo "DEBUG: docker daemon not reachable"
+          echo "DEBUG: trying direct docker run:"
+          docker run --rm --read-only --tmpfs /tmp:rw,size=200m --cap-drop=ALL --network=bridge \
+            -v "${WORKSPACE_HOST:-$HOME/software-dev-Lob}:/workspace:rw" \
+            -w /workspace \
+            python:3.12-alpine python3 --version 2>&1 || echo "DEBUG: direct docker run failed with $?"
+
       - name: Smoke test - lobster-pm
         run: ./bin/lobster-team run lobster-pm python3 --version
       - name: Smoke test - lobster-architect
