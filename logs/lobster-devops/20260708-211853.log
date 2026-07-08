@@ -1,7 +1,0 @@
-git version 2.54.0
-curl 8.21.0 (x86_64-alpine-linux-musl) libcurl/8.21.0 OpenSSL/3.5.7 zlib/1.3.2 brotli/1.2.0 zstd/1.5.7 c-ares/1.34.6 libidn2/2.3.8 libpsl/0.21.5 nghttp2/1.69.0
-Release-Date: 2026-06-24
-Protocols: dict file ftp ftps gopher gophers http https imap imaps ipfs ipns mqtt mqtts pop3 pop3s rtsp smtp smtps telnet tftp ws wss
-Features: alt-svc AsynchDNS brotli HSTS HTTP2 HTTPS-proxy IDN IPv6 Largefile libz PSL SSL threadsafe TLS-SRP UnixSockets zstd
-jq-1.8.1
-OpenSSH_10.3p1, OpenSSL 3.5.7 9 Jun 2026

@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pbf
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+
+# Dashboard runtime
+dashboard/dashboard.pid
+dashboard/dashboard.log
+dashboard/dashboard.log.err
+
+# Logs (per-role sandbox execution)
+logs/
+*.log
+logs/**/*.log
+
+# Test artifacts
+__main__.py.body.json
+__main__.py.content.txt
+__main__.py.upload.txt
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python venv
+.venv/
+venv/
+env/
+
+# Build artifacts
+dist/
+build/
+*.egg

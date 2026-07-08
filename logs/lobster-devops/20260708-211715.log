@@ -1,2 +1,0 @@
-touch: /should-fail.txt: Read-only file system
-ROOT-READ-ONLY-OK
