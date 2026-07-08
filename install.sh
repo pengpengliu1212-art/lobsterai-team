@@ -95,7 +95,10 @@ fi
 # === Step 2: Verify workspace root ===
 step "2/6 Verifying workspace root $WORKSPACE_ROOT..."
 if [[ ! -d "$WORKSPACE_ROOT" ]]; then
-    err "workspace root $WORKSPACE_ROOT does not exist. Use --workspace-root to override."
+    # On CI runners the workspace root may not exist (HOME is the runner user's home,
+    # not the developer workspace). Auto-create so install.sh is idempotent everywhere.
+    mkdir -p "$WORKSPACE_ROOT" 2>/dev/null && ok "created workspace root $WORKSPACE_ROOT" \
+      || warn "could not create workspace root $WORKSPACE_ROOT"
 else
     ok "workspace root exists"
 fi

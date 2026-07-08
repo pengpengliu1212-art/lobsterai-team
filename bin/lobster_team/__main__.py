@@ -42,11 +42,11 @@ def _ok(msg):
 
 
 def _warn(msg):
-    print(f"[WARN] {msg}", file=sys.stderr)
+    print(f"[WARN] {msg}", file=sys.stderr, flush=True)
 
 
 def _err(msg):
-    print(f"[ERR] {msg}", file=sys.stderr)
+    print(f"[ERR] {msg}", file=sys.stderr, flush=True)
 
 
 # ----------------------------------------------------------------------------

@@ -29,6 +29,8 @@ if (-not (Test-Path $PythonCore)) {
     exit 1
 }
 
-# Run
-& $Python $PythonCore @args
+# Run (-u = unbuffered; on CI runners Python buffers stderr/stdout,
+# so error output may not reach the parent before the wrapper exits.
+# Use -u to flush immediately so callers like CI tests can capture output.)
+& $Python -u $PythonCore @args
 exit $LASTEXITCODE
