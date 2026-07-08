@@ -1,0 +1,5 @@
+/usr/local/bin/kubectl
+/usr/local/bin/helm
+Client Version: v1.31.0
+Kustomize Version: v5.4.2
+version.BuildInfo{Version:"v3.15.4", GitCommit:"fa9efb07d9d8debbb4306d72af76a383895aa8c4", GitTreeState:"clean", GoVersion:"go1.22.6"}

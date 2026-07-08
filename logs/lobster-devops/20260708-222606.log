@@ -1,0 +1,83 @@
+[
+    {
+        "Id": "sha256:f8450a19fd6f2ad8152bbefde44d1f2c09b7700624f510f81c2d19df2d9705eb",
+        "RepoTags": [
+            "lobsterai-team-devops:latest"
+        ],
+        "RepoDigests": [
+            "lobsterai-team-devops@sha256:f8450a19fd6f2ad8152bbefde44d1f2c09b7700624f510f81c2d19df2d9705eb"
+        ],
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2026-07-08T14:25:41.380246Z",
+        "Config": {
+            "User": "appuser",
+            "Env": [
+                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "LANG=C.UTF-8",
+                "GPG_KEY=7169605F62C751356D054A26A821E680E5FA6305",
+                "PYTHON_VERSION=3.12.13",
+                "PYTHON_SHA256=c08bc65a81971c1dd5783182826503369466c7e67374d1646519adf05207b684"
+            ],
+            "Cmd": [
+                "/bin/sh"
+            ],
+            "WorkingDir": "/workspace",
+            "Labels": {
+                "org.opencontainers.image.authors": "lobsterai-team",
+                "org.opencontainers.image.description": "DevOps / SRE role sandbox image for lobsterai-team",
+                "org.opencontainers.image.documentation": "file:///H:/software-dev-Lob/lobsterai-team/skills/lobster-devops/SKILL.md",
+                "org.opencontainers.image.licenses": "MIT",
+                "org.opencontainers.image.source": "https://github.com/lobsterai-team/lobsterai-team",
+                "org.opencontainers.image.title": "lobsterai-team-devops",
+                "org.opencontainers.image.version": "1.0.0"
+            },
+            "ArgsEscaped": true,
+            "Healthcheck": {
+                "Test": [
+                    "CMD-SHELL",
+                    "sh -c 'which kubectl && which helm && which git && which curl' || exit 1"
+                ],
+                "Interval": 60000000000,
+                "Timeout": 5000000000,
+                "Retries": 2
+            }
+        },
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 61480273,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:34884abbe92863fce933ed7c39c0e045631af0ed86d5cc0dfbdf9fdca426ce3c",
+                "sha256:c83582aeaa36eca050f912d75169d201e89677463d58c2ce5a04dd2a562c46ab",
+                "sha256:e93d90c70bdffabd4d86fb87571951f5372d4a403138d03305e6eef4fa8be229",
+                "sha256:8e5e9a87b99a1854e8092efc0af2e6705f903feee92924e884fe710add465b9d",
+                "sha256:3946ca348a277300c8156f2ae5da86a4288f348dc5b520422d43a14b3f5078dd",
+                "sha256:4b3b71dcd500a1dbd66a64a32c31a5256ce63001215e0e0e5fae5da9f86e320c",
+                "sha256:b6e8209bf96d45a9aeea93f96b6f3f5230a9a13f0f0317e3e9f17a4d85107382",
+                "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+                "sha256:c51f28d2487f79bd07706fbb572f30c0c75536781c9880370c9b031b537de79a",
+                "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+                "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-07-08T14:25:41.9255434Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.oci.image.index.v1+json",
+            "digest": "sha256:f8450a19fd6f2ad8152bbefde44d1f2c09b7700624f510f81c2d19df2d9705eb",
+            "size": 856
+        },
+        "Identity": {
+            "Build": [
+                {
+                    "Ref": "s0sb8fwjqgeempko4000pv4qx",
+                    "CreatedAt": "2026-07-08T14:25:42.0489822Z"
+                }
+            ]
+        }
+    }
+]
+Client Version: v1.31.0
+Kustomize Version: v5.4.2

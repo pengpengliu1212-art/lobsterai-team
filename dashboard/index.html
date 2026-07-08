@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>lobsterai-team dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0f1115;
+    --bg-2: #161922;
+    --bg-3: #1d2230;
+    --fg: #e4e6eb;
+    --fg-2: #9ba1b0;
+    --accent: #4fc3f7;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --err: #f87171;
+    --border: #2a2f3e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--fg); }
+  header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-2); }
+  header h1 { font-size: 16px; font-weight: 600; margin: 0; }
+  header .meta { font-size: 12px; color: var(--fg-2); }
+  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .card .label { font-size: 11px; text-transform: uppercase; color: var(--fg-2); letter-spacing: 0.05em; margin-bottom: 8px; }
+  .card .value { font-size: 28px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .card .sub { font-size: 11px; color: var(--fg-2); margin-top: 4px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+  .panel { background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .panel-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-3); }
+  .panel-header h2 { font-size: 13px; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg-2); }
+  .panel-body { padding: 12px 16px; }
+  .panel-body.tight { padding: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+  th { text-align: left; padding: 8px 12px; background: var(--bg-3); color: var(--fg-2); font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; }
+  td { padding: 8px 12px; border-top: 1px solid var(--border); }
+  tr:hover { background: var(--bg-3); }
+  .status-up { color: var(--ok); }
+  .status-down { color: var(--err); }
+  .status-warn { color: var(--warn); }
+  .log-tabs { display: flex; gap: 4px; padding: 8px 12px 0; background: var(--bg-3); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .log-tab { padding: 6px 12px; font-size: 12px; color: var(--fg-2); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .log-tab:hover { color: var(--fg); }
+  .log-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .log-list { max-height: 360px; overflow-y: auto; }
+  .log-file { padding: 8px 12px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 12px; }
+  .log-file:hover { background: var(--bg-3); }
+  .log-file .role { display: inline-block; padding: 2px 6px; background: var(--bg-3); border-radius: 3px; font-size: 10px; text-transform: uppercase; color: var(--accent); margin-right: 8px; }
+  .log-file .meta { color: var(--fg-2); font-size: 11px; }
+  .log-tail { background: #000; color: #b0b8c8; padding: 12px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 11px; line-height: 1.5; max-height: 360px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+  .log-tail .empty { color: #555; font-style: italic; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 6px 12px; font-size: 12px; background: var(--bg-3); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
+  .btn:hover { background: var(--border); }
+  .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .btn-primary:hover { background: #6dd0ff; }
+  .badge { display: inline-block; padding: 2px 6px; background: var(--bg-3); border-radius: 3px; font-size: 10px; color: var(--fg-2); margin-left: 6px; }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-right: 6px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .conn-status { font-size: 11px; color: var(--fg-2); }
+  .conn-status.live { color: var(--ok); }
+  .conn-status.dead { color: var(--err); }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🐚 lobsterai-team dashboard</h1>
+    <div class="meta">real-time sandbox monitor · localhost:8080</div>
+  </div>
+  <div>
+    <span class="conn-status" id="connStatus"><span class="status-dot"></span>SSE connected</span>
+  </div>
+</header>
+
+<main>
+  <!-- Summary cards -->
+  <div class="cards" id="cards">
+    <div class="card"><div class="label">Running Containers</div><div class="value" id="card-running">–</div><div class="sub">all docker</div></div>
+    <div class="card"><div class="label">Images</div><div class="value" id="card-images">–</div><div class="sub">lobsterai-team + base</div></div>
+    <div class="card"><div class="label">Logs Today</div><div class="value" id="card-logs">–</div><div class="sub">sandbox runs</div></div>
+    <div class="card"><div class="label">Starts 24h</div><div class="value" id="card-starts">–</div><div class="sub">sandbox invocations</div></div>
+    <div class="card"><div class="label">Errors 24h</div><div class="value" id="card-errors">–</div><div class="sub">non-zero exits</div></div>
+  </div>
+
+  <!-- Active containers + Images -->
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Active Containers</h2>
+        <span class="badge" id="containerCount">0</span>
+      </div>
+      <div class="panel-body tight">
+        <table id="containerTable">
+          <thead><tr><th>Name</th><th>Image</th><th>Status</th><th>Created</th><th>Ports</th></tr></thead>
+          <tbody><tr><td colspan="5" style="color: var(--fg-2); text-align: center;">loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Images</h2>
+        <span class="badge" id="imageCount">0</span>
+      </div>
+      <div class="panel-body tight">
+        <table id="imageTable">
+          <thead><tr><th>Tag</th><th>Size</th><th>ID</th><th>Created</th></tr></thead>
+          <tbody><tr><td colspan="4" style="color: var(--fg-2); text-align: center;">loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs -->
+  <div class="panel" style="margin-bottom: 24px;">
+    <div class="panel-header">
+      <h2>Sandbox Logs</h2>
+      <div class="actions">
+        <button class="btn" onclick="refreshLogs()">↻ refresh</button>
+        <button class="btn" onclick="cleanupContainers()">🧹 cleanup</button>
+      </div>
+    </div>
+    <div class="log-tabs" id="logTabs">
+      <button class="log-tab active" data-role="">all</button>
+      <button class="log-tab" data-role="lobster-pm">pm</button>
+      <button class="log-tab" data-role="lobster-architect">architect</button>
+      <button class="log-tab" data-role="lobster-coder">coder</button>
+      <button class="log-tab" data-role="lobster-qa">qa</button>
+      <button class="log-tab" data-role="lobster-devops">devops</button>
+      <button class="log-tab" data-role="lobster-data">data</button>
+    </div>
+    <div class="log-list" id="logList">
+      <div class="log-tail empty">No logs yet. Run a sandbox (e.g., <code>.\skills\lobster-coder\scripts\sandbox_exec.ps1 node --version</code>) to see entries here.</div>
+    </div>
+  </div>
+
+  <!-- Selected log tail -->
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Log Tail</h2>
+      <span class="meta" id="tailPath">—</span>
+    </div>
+    <div class="log-tail empty" id="logTail">Click a log file above to view its tail.</div>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let currentRole = "";
+let selectedLog = null;
+
+function fmtTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleTimeString();
+}
+
+async function fetchJSON(path) {
+  const r = await fetch(path, { cache: "no-store" });
+  if (!r.ok) throw new Error(`${path} → ${r.status}`);
+  return r.json();
+}
+
+async function refreshStats() {
+  try {
+    const stats = await fetchJSON("/api/stats");
+    $("card-running").textContent = stats.running_containers ?? "–";
+    $("card-images").textContent = stats.image_count ?? "–";
+    $("card-logs").textContent = stats.logs_today ?? "–";
+    $("card-starts").textContent = stats.starts_24h ?? "–";
+    $("card-errors").textContent = stats.errors_24h ?? "–";
+  } catch (e) { console.warn("stats:", e); }
+}
+
+async function refreshContainers() {
+  try {
+    const rows = await fetchJSON("/api/containers");
+    $("containerCount").textContent = rows.length;
+    const tbody = $("containerTable").querySelector("tbody");
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="color: var(--fg-2); text-align: center; padding: 24px;">No running containers. (sandbox_exec uses <code>--rm</code>, so containers exit after each command.)</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${esc(r.name)}</td>
+        <td>${esc(r.image)}</td>
+        <td class="${r.status.toLowerCase().includes("up") ? "status-up" : "status-warn"}">${esc(r.status)}</td>
+        <td>${esc(r.created)}</td>
+        <td>${esc(r.ports)}</td>
+      </tr>
+    `).join("");
+  } catch (e) { console.warn("containers:", e); }
+}
+
+async function refreshImages() {
+  try {
+    const rows = await fetchJSON("/api/images");
+    $("imageCount").textContent = rows.length;
+    const tbody = $("imageTable").querySelector("tbody");
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="color: var(--fg-2); text-align: center; padding: 24px;">No images.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${esc(r.tag)}</td>
+        <td>${esc(r.size)}</td>
+        <td>${esc(r.id)}</td>
+        <td>${esc(r.created)}</td>
+      </tr>
+    `).join("");
+  } catch (e) { console.warn("images:", e); }
+}
+
+async function refreshLogs() {
+  try {
+    const roleParam = currentRole ? `?role=${encodeURIComponent(currentRole)}` : "";
+    const rows = await fetchJSON(`/api/logs${roleParam}`);
+    const list = $("logList");
+    if (rows.length === 0) {
+      list.innerHTML = `<div class="log-tail empty">No logs${currentRole ? " for role " + currentRole : ""} yet.</div>`;
+      return;
+    }
+    list.innerHTML = rows.map(l => `
+      <div class="log-file" data-path="${esc(l.path)}" onclick="selectLog(this.dataset.path)">
+        <div>
+          <span class="role">${esc(l.role)}</span>
+          <span>${esc(l.rel)}</span>
+        </div>
+        <div class="meta">${l.size}B · ${fmtTime(l.mtime)}</div>
+      </div>
+    `).join("");
+  } catch (e) { console.warn("logs:", e); }
+}
+
+async function selectLog(path) {
+  selectedLog = path;
+  $("tailPath").textContent = path;
+  try {
+    const r = await fetchJSON(`/api/tail?path=${encodeURIComponent(path)}&lines=200`);
+    const tail = $("logTail");
+    if (!r.lines || r.lines.length === 0) {
+      tail.className = "log-tail empty";
+      tail.textContent = "(empty log)";
+      return;
+    }
+    tail.className = "log-tail";
+    tail.textContent = r.lines.join("\n");
+    tail.scrollTop = tail.scrollHeight;
+  } catch (e) {
+    $("logTail").className = "log-tail empty";
+    $("logTail").textContent = "Error: " + e.message;
+  }
+}
+
+async function cleanupContainers() {
+  if (!confirm("Remove all stopped containers and dangling images older than 24h?")) return;
+  try {
+    const r = await fetchJSON("/api/cleanup");
+    alert("Cleanup started: " + r.status);
+  } catch (e) { alert("Failed: " + e.message); }
+}
+
+function esc(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+document.getElementById("logTabs").addEventListener("click", (e) => {
+  if (!e.target.classList.contains("log-tab")) return;
+  document.querySelectorAll(".log-tab").forEach(t => t.classList.remove("active"));
+  e.target.classList.add("active");
+  currentRole = e.target.dataset.role;
+  refreshLogs();
+});
+
+// SSE: stats update every 3s
+let sse = null;
+function connectSSE() {
+  const params = currentRole ? `?role=${encodeURIComponent(currentRole)}` : "";
+  sse = new EventSource("/api/events" + params);
+  sse.onopen = () => {
+    $("connStatus").className = "conn-status live";
+    $("connStatus").innerHTML = '<span class="status-dot"></span>SSE connected';
+  };
+  sse.onerror = () => {
+    $("connStatus").className = "conn-status dead";
+    $("connStatus").innerHTML = '○ SSE disconnected (retrying)';
+  };
+  sse.onmessage = (e) => {
+    try {
+      const msg = JSON.parse(e.data);
+      if (msg.type === "stats_update") {
+        const s = msg.stats;
+        $("card-running").textContent = s.running_containers ?? "–";
+        $("card-images").textContent = s.image_count ?? "–";
+        $("card-logs").textContent = s.logs_today ?? "–";
+        $("card-starts").textContent = s.starts_24h ?? "–";
+        $("card-errors").textContent = s.errors_24h ?? "–";
+      } else if (msg.type === "new_log") {
+        refreshLogs();
+        if (selectedLog === msg.path) selectLog(msg.path);
+      }
+    } catch {}
+  };
+}
+
+// Initial load
+refreshStats();
+refreshContainers();
+refreshImages();
+refreshLogs();
+connectSSE();
+
+// Polling fallbacks (SSE handles most updates; these are belt-and-suspenders)
+setInterval(refreshContainers, 5000);
+setInterval(refreshImages, 30000);
+setInterval(refreshLogs, 10000);
+</script>
+</body>
+</html>

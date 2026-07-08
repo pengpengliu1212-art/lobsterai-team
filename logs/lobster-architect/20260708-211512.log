@@ -1,0 +1,2 @@
+Schema loaded, fields: ['design_doc', 'adrs', 'tech_decisions', 'components', 'non_functional']
+Required fields: ['design_doc', 'adrs', 'tech_decisions', 'components', 'non_functional']

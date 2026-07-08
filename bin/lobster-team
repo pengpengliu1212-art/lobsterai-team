@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# ========================================
+# lobsterai-team CLI entry point (macOS / Linux)
+# Delegates to Python core (argparse, zero deps)
+# Per Mechanical Rock 2026 bash best practice: env shebang + set -e
+# ========================================
+
+set -euo pipefail
+
+# Resolve our actual location (follow symlinks)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEAM_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PYTHON_CORE="$TEAM_ROOT/bin/lobster_team/__main__.py"
+
+# Pick Python
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON=python3
+elif command -v python >/dev/null 2>&1; then
+    PYTHON=python
+else
+    echo "[ERR] python3 not found in PATH" >&2
+    echo "      install Python 3.8+ first" >&2
+    exit 1
+fi
+
+# Verify Python core exists
+if [[ ! -f "$PYTHON_CORE" ]]; then
+    echo "[ERR] lobster-team core not found at $PYTHON_CORE" >&2
+    exit 1
+fi
+
+# Run
+exec "$PYTHON" "$PYTHON_CORE" "$@"

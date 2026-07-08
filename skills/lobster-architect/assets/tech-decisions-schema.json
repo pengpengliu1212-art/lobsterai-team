@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lobsterai-team/schemas/tech-decisions.json",
+  "title": "lobster-architect tech decisions",
+  "description": "Output contract for lobster-architect role. Validated by GM at handoff. additionalProperties=false rejects any field not declared here (per LLM Structured Outputs 2026).",
+  "type": "object",
+  "required": ["design_doc", "adrs", "tech_decisions", "components", "non_functional"],
+  "additionalProperties": false,
+  "properties": {
+    "design_doc": {
+      "type": "string",
+      "description": "Path to the design.md file (5-phase framework)"
+    },
+    "adrs": {
+      "type": "array",
+      "description": "List of ADR file paths created in this task",
+      "items": {
+        "type": "string",
+        "pattern": "^/workspace/docs/adr/ADR-\\d{4}-.+\\.md$"
+      }
+    },
+    "tech_decisions": {
+      "type": "array",
+      "description": "One entry per architecturally significant decision",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["decision", "alternatives", "rationale"],
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "type": "string",
+            "description": "The chosen option, e.g., 'Use PostgreSQL for primary data store'"
+          },
+          "alternatives": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Other options considered, e.g., ['MySQL', 'MongoDB']",
+            "minItems": 1
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 20,
+            "description": "Why this option won, with reference to drivers"
+          },
+          "adr_reference": {
+            "type": "string",
+            "description": "Optional ADR file path that documents this decision in detail"
+          }
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "description": "Top-level components identified in the design",
+      "items": {
+        "type": "object",
+        "required": ["name", "responsibility"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "responsibility": {
+            "type": "string",
+            "minLength": 10
+          },
+          "depends_on": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "non_functional": {
+      "type": "object",
+      "description": "NFRs for the design. All fields optional but recommended.",
+      "properties": {
+        "latency_p99": { "type": "string" },
+        "latency_p50": { "type": "string" },
+        "throughput": { "type": "string" },
+        "availability": { "type": "string" },
+        "storage_growth": { "type": "string" },
+        "team_size": { "type": "string" },
+        "budget_monthly": { "type": "string" }
+      }
+    }
+  }
+}

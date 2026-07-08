@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lobsterai-team/schemas/data-analysis.json",
+  "title": "lobster-data analysis output",
+  "description": "Output contract for lobster-data role. Validated by GM at handoff. Uses schema_version + prompt_version for traceability.",
+  "type": "object",
+  "required": [
+    "task_type",
+    "status",
+    "schema_version",
+    "prompt_version",
+    "results",
+    "artifacts",
+    "data_caveats"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "enum": ["etl", "sql", "analysis", "ml-model", "visualization"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["success", "failed", "partial"]
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version of this output schema (semver). Bump on breaking changes."
+    },
+    "prompt_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version of the prompt that produced this output (semver)."
+    },
+    "results": {
+      "type": "object",
+      "description": "Task-specific results. Fields vary by task_type.",
+      "properties": {
+        "primary_metric": { "type": "string" },
+        "secondary_metrics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "row_count": { "type": "integer", "minimum": 0 },
+        "columns": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "Paths to all output files (analysis.md, query.sql, plot.png, etc.)",
+      "items": {
+        "type": "string",
+        "pattern": "^/workspace/.lobsterai/data/.+"
+      },
+      "minItems": 0
+    },
+    "data_caveats": {
+      "type": "array",
+      "description": "Honest list of data limitations, missing values, distribution shifts, sample size issues",
+      "items": { "type": "string" }
+    },
+    "human_approval_needed": {
+      "type": "boolean",
+      "description": "Set to true if this output requires human approval before any downstream action"
+    },
+    "human_approval_reason": {
+      "type": ["string", "null"],
+      "description": "If human_approval_needed, explain what needs approval"
+    },
+    "cost_estimate": {
+      "type": "object",
+      "description": "Optional: estimated cost of running this in production",
+      "properties": {
+        "compute": { "type": "string" },
+        "storage": { "type": "string" },
+        "duration": { "type": "string" }
+      }
+    }
+  }
+}
