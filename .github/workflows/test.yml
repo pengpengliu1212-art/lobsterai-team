@@ -81,7 +81,26 @@ jobs:
             python:3.12-alpine python3 --version 2>&1 || echo "DEBUG: direct docker run failed with $?"
 
       - name: Smoke test - lobster-pm
-        run: ./bin/lobster-team run lobster-pm python3 --version
+        run: |
+          set +e
+          echo "TRACE: WORKSPACE_HOST=${WORKSPACE_HOST:-<unset>}"
+          echo "TRACE: PATH=$PATH"
+          echo "TRACE: pwd=$(pwd)"
+          echo "TRACE: ls bin/:"
+          ls -la bin/ 2>&1 | head -5
+          echo "TRACE: ls skills/lobster-pm/:"
+          ls -la skills/lobster-pm/ 2>&1 | head -10
+          echo "TRACE: ls skills/lobster-pm/scripts/:"
+          ls -la skills/lobster-pm/scripts/ 2>&1
+          echo "TRACE: python3 -V:"
+          python3 -V 2>&1
+          echo "TRACE: which python3:"
+          which python3 2>&1 || true
+          echo "TRACE: running ./bin/lobster-team run lobster-pm python3 --version"
+          ./bin/lobster-team run lobster-pm python3 --version 2>&1
+          rc=$?
+          echo "TRACE: exit=$rc"
+          exit $rc
       - name: Smoke test - lobster-architect
         run: ./bin/lobster-team run lobster-architect python3 --version
       - name: Smoke test - lobster-coder
