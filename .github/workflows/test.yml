@@ -43,6 +43,20 @@ jobs:
       - name: Install lobsterai-team (headless, skip dashboard)
         run: ./install.sh --skip-dashboard --skip-skill-link
 
+      - name: Build custom role images (devops, data)
+        run: |
+          docker build -t lobsterai-team-devops:latest ./images/devops
+          docker build -t lobsterai-team-data:latest ./images/data
+
+      - name: Pre-create workspace root for role sandboxes
+        run: |
+          # sandbox_exec.sh mounts \$WORKSPACE_HOST (defaults to \$HOME/software-dev-Lob).
+          # On CI runners that path doesn't exist; create it so docker volume mount succeeds.
+          mkdir -p "$HOME/software-dev-Lob"
+          # On CI use the repo checkout as the workspace so any role commands that need
+          # access to repo files can read them.
+          echo "WORKSPACE_HOST=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+
       - name: Verify CLI version
         run: ./bin/lobster-team version
 
@@ -156,5 +170,15 @@ jobs:
       - name: Verify role allowlist
         shell: pwsh
         run: |
-          $r = ./bin/lobster-team.ps1 run "../bad" python3 2>&1
-          if ($r -match "unknown role") { "PASS" } else { "FAIL"; exit 1 }
+          # Use a temp file to capture output reliably (avoids any PowerShell
+          # stream redirection quirks on different runner versions).
+          $tmpOut = [System.IO.Path]::GetTempFileName()
+          ./bin/lobster-team.ps1 run "../bad" python3 *> $tmpOut
+          $content = Get-Content -Raw $tmpOut
+          Remove-Item -Force $tmpOut
+          if ($content -match "unknown role") {
+            "PASS"
+          } else {
+            "FAIL: output was: $content"
+            exit 1
+          }
