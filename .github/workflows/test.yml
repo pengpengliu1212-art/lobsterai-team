@@ -69,6 +69,10 @@ jobs:
         run: |
           set +e
           FAIL=0
+          # Diagnose: verify docker daemon + images before running
+          docker version --format '{{.Server.Version}}' || { echo "FAIL: docker daemon not reachable"; exit 1; }
+          docker image ls --format '{{.Repository}}:{{.Tag}}' | head -20
+          echo "WORKSPACE_HOST=${WORKSPACE_HOST:-<unset>}"
           for role in lobster-pm lobster-architect lobster-coder lobster-qa lobster-devops lobster-data; do
             echo "--- $role ---"
             case $role in
@@ -77,8 +81,9 @@ jobs:
               lobster-devops) ./bin/lobster-team run "$role" cat /etc/alpine-release ;;
               lobster-data) ./bin/lobster-team run "$role" python3 --version ;;
             esac
-            if [ $? -ne 0 ]; then
-              echo "FAIL: $role"
+            rc=$?
+            if [ $rc -ne 0 ]; then
+              echo "FAIL: $role (exit $rc)"
               FAIL=$((FAIL+1))
             fi
           done
