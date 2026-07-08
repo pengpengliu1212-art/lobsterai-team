@@ -170,16 +170,22 @@ jobs:
       - name: Verify role allowlist
         shell: pwsh
         run: |
-          # Use cmd.exe redirection (more reliable than PowerShell streams for
-          # capturing child process output across runner versions).
-          # Invoke Python directly to avoid any PS1 wrapper edge cases.
+          # Use Start-Process with explicit stdout/stderr redirection (most reliable
+          # way to capture child process output across PowerShell / runner versions).
           $tmpOut = [System.IO.Path]::GetTempFileName()
-          cmd /c "python -u bin\lobster_team\__main__.py run \"../bad\" python3 > $tmpOut 2>&1"
-          $content = Get-Content -Raw $tmpOut
-          Remove-Item -Force $tmpOut
+          $tmpErr = [System.IO.Path]::GetTempFileName()
+          $p = Start-Process -FilePath "python" `
+                              -ArgumentList @("-u", "bin\lobster_team\__main__.py", "run", "../bad", "python3") `
+                              -RedirectStandardOutput $tmpOut `
+                              -RedirectStandardError $tmpErr `
+                              -NoNewWindow -Wait -PassThru
+          $stdout = Get-Content -Raw $tmpOut
+          $stderr = Get-Content -Raw $tmpErr
+          Remove-Item -Force $tmpOut, $tmpErr
+          $content = $stdout + $stderr
           if ($content -match "unknown role") {
             "PASS"
           } else {
-            "FAIL: output was: $content"
+            "FAIL: stdout=$stdout stderr=$stderr exit=$($p.ExitCode)"
             exit 1
           }
