@@ -170,10 +170,11 @@ jobs:
       - name: Verify role allowlist
         shell: pwsh
         run: |
-          # Use a temp file to capture output reliably (avoids any PowerShell
-          # stream redirection quirks on different runner versions).
+          # Use cmd.exe redirection (more reliable than PowerShell streams for
+          # capturing child process output across runner versions).
+          # Invoke Python directly to avoid any PS1 wrapper edge cases.
           $tmpOut = [System.IO.Path]::GetTempFileName()
-          ./bin/lobster-team.ps1 run "../bad" python3 *> $tmpOut
+          cmd /c "python -u bin\lobster_team\__main__.py run \"../bad\" python3 > $tmpOut 2>&1"
           $content = Get-Content -Raw $tmpOut
           Remove-Item -Force $tmpOut
           if ($content -match "unknown role") {
